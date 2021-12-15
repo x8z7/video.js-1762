@@ -47,6 +47,14 @@ var version = "7.10.2";
  */
 
 var history = [];
+
+/**
+ * Лимит времени, который при ручной перемотке нужно прибавлять к стартовому значению сегмента, если он меньше 0
+ *
+ * @type {number}
+ */
+var PTS_LIMIT = 95444;
+
 /**
  * Log messages to the console and history based on the type of message
  *
@@ -34309,7 +34317,7 @@ var TransmuxWorker = new shimWorker("./transmuxer-worker.worker.js", function (w
       };
 
       this.reset = function () {
-        this.discontinuity();
+        // this.discontinuity();
         this.trigger('reset');
       };
     };
@@ -44331,6 +44339,14 @@ var SyncController = /*#__PURE__*/function (_videojs$EventTarget) {
       segment.end = timingInfo.end + mappingObj.mapping;
     } else if (mappingObj) {
       segment.start = timingInfo.start + mappingObj.mapping;
+
+        /**
+        * TODO фикс идёт в паре с фиксом ... для корректной перемотки через 25 минут
+        */
+      if (segment.start < 0) {
+        segment.start += PTS_LIMIT
+      }
+
       segment.end = timingInfo.end + mappingObj.mapping;
     } else {
       return false;
